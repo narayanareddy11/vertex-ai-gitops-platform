@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+*.env.local
+
+# ML artefacts (large binaries — use DVC or S3 instead)
+apps/ml-model/models/*.joblib
+apps/ml-model/models/*.pkl
+apps/ml-model/models/*.h5
+
+# Evidently reports (generated, not source)
+evidently/reports/*.html
+evidently/reports/*.json
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+!terraform/environments/*/terraform.tfvars.example
+
+# Helm
+*.tgz
+
+# Secrets (never commit)
+**/secrets.yaml
+**/vault-token
+**/.vault-token
+kubeconfig
+
+# Jenkins
+jenkins/jenkins_home/
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Test output
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
