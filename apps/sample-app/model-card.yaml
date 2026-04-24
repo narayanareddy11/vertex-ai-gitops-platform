@@ -1,0 +1,21 @@
+apiVersion: ai.platform/v1
+kind: ModelCard
+metadata:
+  name: sample-app
+  version: "1.0.0"
+  owner: platform-team
+  approved-by: risk-committee
+  approval-date: "2026-04-19"
+spec:
+  model-type: heuristic
+  framework: none
+  training-data: none
+  intended-use: "Demo REST service for GitOps platform showcase"
+  out-of-scope: "Production financial decisions"
+  risk-level: low
+  explainability: full
+  fairness-assessment: not-applicable
+  data-privacy: no-pii
+  regulatory:
+    fca-sr11-7: compliant
+    gdpr: compliant
