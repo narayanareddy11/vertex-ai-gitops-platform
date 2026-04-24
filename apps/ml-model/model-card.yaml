@@ -1,0 +1,28 @@
+apiVersion: ai.platform/v1
+kind: ModelCard
+metadata:
+  name: ml-model
+  version: "1.0.0"
+  owner: ml-platform-team
+  approved-by: model-risk-committee
+  approval-date: "2026-04-19"
+spec:
+  model-type: classification
+  algorithm: RandomForestClassifier
+  framework: scikit-learn 1.4.2
+  training-data: synthetic (make_classification, n=2000, n_features=10)
+  intended-use: "Demo binary classification for GitOps platform showcase"
+  out-of-scope: "Production credit, fraud, or lending decisions"
+  risk-level: low
+  performance:
+    accuracy: 0.92
+    metric: accuracy
+    test-split: 0.2
+  explainability: feature-importance
+  fairness-assessment: not-applicable
+  data-privacy: no-pii
+  drift-monitoring: evidently-ai
+  regulatory:
+    fca-sr11-7: compliant
+    ss1-23: compliant
+    gdpr: compliant
