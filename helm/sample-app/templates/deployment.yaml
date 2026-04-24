@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.fullnameOverride | default .Chart.Name }}
+  namespace: apps
+  labels:
+    app: {{ .Values.fullnameOverride | default .Chart.Name }}
+    version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+  annotations:
+    ai.platform/model-card: {{ index .Values.annotations "ai.platform/model-card" | quote }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.fullnameOverride | default .Chart.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.fullnameOverride | default .Chart.Name }}
+        version: {{ .Chart.AppVersion }}
+      annotations:
+        ai.platform/model-card: {{ index .Values.annotations "ai.platform/model-card" | quote }}
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "8000"
+    spec:
+      serviceAccountName: sample-app
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: sample-app
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 8000
+          env:
+            {{- range $k, $v := .Values.env }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop: [ALL]

@@ -1,0 +1,38 @@
+replicaCount: 2
+
+image:
+  repository: python
+  tag: "3.11-slim"
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: "sample-app"
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+env:
+  APP_VERSION: "1.0.0"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger.monitoring:4317"
+
+annotations:
+  ai.platform/model-card: "sample-app-v1.0.0"
+  prometheus.io/scrape: "true"
+  prometheus.io/path: "/metrics"
+  prometheus.io/port: "8000"
