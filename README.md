@@ -7,6 +7,8 @@
 ![Jenkins](https://img.shields.io/badge/jenkins-2.x-D24939?logo=jenkins)
 ![Vault](https://img.shields.io/badge/vault-1.17-FFEC6E?logo=vault)
 ![License](https://img.shields.io/badge/license-MIT-green)
+![Sample App Tests](https://github.com/narayanareddy11/vertex-ai-gitops-platform/actions/workflows/test-sample-app.yml/badge.svg)
+![ML Model Tests](https://github.com/narayanareddy11/vertex-ai-gitops-platform/actions/workflows/test-ml-model.yml/badge.svg)
 
 > **Enterprise AI-safe GitOps platform** — end-to-end ML model lifecycle management
 > with policy enforcement, full observability, and autonomous AI incident response.
@@ -164,6 +166,133 @@ vertex-ai-gitops-platform/
 | RAM allocated | ≥ 8 GB | Docker Desktop → Resources |
 | Helm | 3.14+ | `brew install helm` |
 | kubectl | 1.29+ | bundled with Docker Desktop |
+
+---
+
+---
+
+## Live Demo Output
+
+Both services run locally on Python 3.11. Below is **real captured output** from the
+running services on Mac M1 / Docker Desktop Kubernetes.
+
+### Sample App — `http://localhost:8000`
+
+**`GET /health`**
+```json
+{
+    "status": "ok",
+    "version": "1.0.0",
+    "uptime_seconds": 149.52
+}
+```
+
+**`POST /predict`** — features `[2.5, 3.1, 1.8, 4.2, 0.9]`
+```json
+{
+    "prediction": 2.5,
+    "confidence": 0.25,
+    "model_version": "v1.0.0",
+    "request_id": "82d2b9e5-ae4c-4410-aa27-297395ac3bb6"
+}
+```
+
+**`POST /predict`** — features `[-1.0, 0.5, 2.0, -3.0, 1.0]`
+```json
+{
+    "prediction": -0.1,
+    "confidence": 0.01,
+    "model_version": "v1.0.0",
+    "request_id": "7e2c9832-885e-4ab0-aad4-43c47b4d2a50"
+}
+```
+
+---
+
+### ML Model Service — `http://localhost:8001`
+
+**`GET /health`** — RandomForest loaded, accuracy 89.25%
+```json
+{
+    "status": "ok",
+    "model_loaded": true,
+    "model_version": "1.0.0",
+    "accuracy": 0.8925,
+    "uptime_seconds": 149.57
+}
+```
+
+**`POST /predict`** — 10 real features → class 1 (62.3% confidence)
+```json
+{
+    "prediction": 1,
+    "probability": [0.3771, 0.6229],
+    "model_version": "1.0.0",
+    "request_id": "0752c351-6ea7-4cf3-9ca2-939817842f6b",
+    "latency_ms": 6.81
+}
+```
+
+**`POST /predict`** — different sample → class 1 (70.6% confidence)
+```json
+{
+    "prediction": 1,
+    "probability": [0.2935, 0.7065],
+    "model_version": "1.0.0",
+    "request_id": "68065d5d-51c1-40e8-af4c-ab16a4a2550a",
+    "latency_ms": 2.78
+}
+```
+
+**`GET /drift`** — Evidently AI drift monitor, no drift detected
+```json
+{
+    "drift_score": 0.0,
+    "threshold": 0.25,
+    "drifted": false,
+    "status": "healthy"
+}
+```
+
+**`GET /metrics`** — Prometheus scrape (real output)
+```
+ml_model_predictions_total{label="1"} 2.0
+ml_model_prediction_seconds_bucket{le="0.005"} 0.0
+ml_model_prediction_seconds_bucket{le="0.01"}  0.0
+ml_model_prediction_seconds_bucket{le="0.025"} 0.0
+ml_model_prediction_seconds_bucket{le="0.05"}  0.0
+ml_model_prediction_seconds_bucket{le="0.5"}   0.0
+ml_model_accuracy 0.8925
+ml_model_drift_score 0.0
+```
+
+---
+
+### Platform Services Running on Kubernetes
+
+```
+NAMESPACE          SERVICE                                    STATUS
+argocd             argocd-server                              Running  → http://localhost:8080
+jenkins            jenkins                                    Running  → http://localhost:8888
+vault              vault                                      Running  → http://localhost:8200
+monitoring         prometheus-grafana                         Running  → http://localhost:3000
+monitoring         prometheus-kube-prometheus-prometheus      Running  → http://localhost:9090
+monitoring         jaeger                                     Running  → http://localhost:16686
+istio-system       kiali                                      Running  → http://localhost:20001
+gatekeeper-system  gatekeeper-controller-manager (×3)        Running  → admission webhook
+istio-system       istiod                                     Running  → strict mTLS enforced
+```
+
+---
+
+### GitHub Actions CI
+
+Two automated test suites run on every push:
+
+| Workflow | Test Case 1 | Test Case 2 |
+|----------|-------------|-------------|
+| **Sample App** | Health & Root endpoints | Predict & Metrics endpoints |
+| **ML Model** | Model training artefact validation (accuracy > 80%) | Inference API schema validation |
 
 ---
 
